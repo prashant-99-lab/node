@@ -1,0 +1,24 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@52.194.235.222 << 'EOF'
+          cd /var/www/nodeapp || { mkdir -p /var/www/nodeapp; cd /var/www/nodeapp; }
+          git clone git@github.com:prashant-99-lab/node.git . || git pull
+          npm install
+          pm2 start index.js --name nodeapp || pm2 restart nodeapp
+          pm2 save
+        EOF
